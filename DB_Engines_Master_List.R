@@ -17,3 +17,6 @@ db_engines.clean <- db_engines.clean[c(4:nrow(db_engines.clean)),]
 
 #remove unnecessary text
 db_engines.clean$database <- gsub(" Detailed vendor-provided information available", "", db_engines.clean$database)
+
+write.csv2(db_engines.clean, "db_master_list.csv", row.names = FALSE)
+

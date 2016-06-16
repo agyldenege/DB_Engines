@@ -1,9 +1,11 @@
 #Get trend data for DB-Engines
+#install.packages("reshape")
 require('stringr')
 require('rvest')
 require(RJSONIO)
 require(jsonlite)
 require(reshape)
+require(sqldf)
 
 url = "http://db-engines.com/en/ranking_trend" #URL we want to scrape
 
@@ -25,13 +27,23 @@ json.text = gsub(', visible:false', '', json.text)
 json.text = gsub('\n', '', json.text)
 json.text = gsub('null', '0.00001', json.text) #replace nulls with 0.00001
 
-json.final <- vector("list", length(json.json)) #Create empty list
+json.text = gsub('null', '0.00001', json.text) #replace nulls with 0.00001
+json.text = gsub('name:', '"name":', json.text) 
+json.text = gsub('data:', '"data":', json.text) 
+
+json.json = fromJSON(json.text)
+
+
+json.final <- vector("list", length(json.json[[1]])) #Create empty list
+
 
 #populate list with clean data
-for (i in 1:length(json.json)) {
-  json.final[[i]] <- json.json[[i]][1]
-  names(json.final[[i]]) <- json.json[[i]][2]$am
+for (i in 1:length(json.json[[1]])) {
+  json.final[[i]] <- json.json[[1]][i]
+  names(json.final[[i]]) <- json.json[[2]][i]
 }
+
+
 
 #convert to dataframe
 db_trends <- (as.data.frame(json.final))
@@ -45,4 +57,5 @@ db_trends$rank_date <- date_range #Assign date range
 db_trends.normalized <- melt(db_trends, id="rank_date") #reshape
 names(db_trends.normalized) <- c("rank_date", "database", "rank") #proper names
 db_trends.normalized$rank[db_trends.normalized$rank == 0.00001] <- NA #remove 0.00001 dummy value
-nrow(db_trends.normalized)
+db_trends.normalized <- sqldf("select rank_date, replace(database, '.', ' ') database, cast(rank as numeric) rank from [db_trends.normalized]")
+write.csv(db_trends.normalized, "db_trends.csv", row.names = FALSE)
