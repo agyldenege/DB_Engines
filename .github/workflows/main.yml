@@ -1,0 +1,41 @@
+name: Execute SQL on Snowflake
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'sql/*.sql'
+  workflow_dispatch:
+
+jobs:
+  run-sql:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install SnowSQL CLI
+      run: |
+        wget https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.24-linux_x86_64.bash
+        bash snowsql-1.2.24-linux_x86_64.bash
+
+    - name: Run SQL script with SnowSQL
+      env:
+        SNOWSQL_ACCOUNT: ${{ secrets.SNOWSQL_ACCOUNT }}
+        SNOWSQL_USER: ${{ secrets.SNOWSQL_USER }}
+        SNOWSQL_PASSWORD: ${{ secrets.SNOWSQL_PASSWORD }}
+        SNOWSQL_WAREHOUSE: ${{ secrets.SNOWSQL_WAREHOUSE }}
+        SNOWSQL_DATABASE: ${{ secrets.SNOWSQL_DATABASE }}
+        SNOWSQL_SCHEMA: ${{ secrets.SNOWSQL_SCHEMA }}
+        SNOWSQL_ROLE: ${{ secrets.SNOWSQL_ROLE }}
+      run: |
+        ~/bin/snowsql -a "$SNOWSQL_ACCOUNT" \
+                      -u "$SNOWSQL_USER" \
+                      -p "$SNOWSQL_PASSWORD" \
+                      -w "$SNOWSQL_WAREHOUSE" \
+                      -d "$SNOWSQL_DATABASE" \
+                      -s "$SNOWSQL_SCHEMA" \
+                      -r "$SNOWSQL_ROLE" \
+                      -f sql/script.sql
