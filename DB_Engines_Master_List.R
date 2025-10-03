@@ -2,6 +2,7 @@
 
 require(rvest)
 
+#this is the proper location to use.
 url <- "http://db-engines.com/en/ranking"
 
 #Get the table data
