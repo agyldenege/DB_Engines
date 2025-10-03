@@ -7,7 +7,8 @@ require(jsonlite)
 require(reshape)
 require(sqldf)
 
-url = "http://db-engines.com/en/ranking_trend" #URL we want to scrape
+#URL we want to scrape
+url = "http://db-engines.com/en/ranking_trend"
 
 html <- read_html(url) %>% html_nodes('script') %>% .[5] #Get the javascript data
 
