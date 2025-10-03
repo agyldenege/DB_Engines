@@ -1,4 +1,5 @@
 #Get DB-Engines table data
+
 require(rvest)
 
 url <- "http://db-engines.com/en/ranking"
